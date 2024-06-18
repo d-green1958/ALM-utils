@@ -177,6 +177,7 @@ def write_vtk(base_loc, direction, radius, tower_height):
     writer.SetFileName(file_name)
     writer.SetInputData(append_filter.GetOutput())
     writer.Write()
+    print("write: done")
 
 
 
@@ -198,7 +199,9 @@ def main():
     print(f"directory: {dir_path}")
 
     base_loc, direction, radius, tower_height = read_data_from_dir(dir=dir_path)
+    print(f"writing VTK to {os.getcwd()}")
     write_vtk(base_loc, direction, radius, tower_height)
+
 
     
   
