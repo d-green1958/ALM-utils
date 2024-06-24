@@ -1,0 +1,135 @@
+#!/bin/bash
+# ===================== SLURM SETTINGS ========================= #
+#SBATCH --nodes=1
+#SBATCH --time=XXX:XXX:XXX
+#SBATCH --job-name=testScript
+#SBATCH --mail-user=dylan.green@eng.ox.ac.uk
+#SBATCH --mail-type=ALL
+#SBATCH --partition=XXX
+
+solve_single() {
+    echo "Running in single core mode..."
+    echo "Executing task..."
+    
+    # make dir for logs file	   
+    mkdir logs -p
+    dir="logs"	
+
+    # copy the 0 directory
+    echo "copying 0 directory"
+    cp -r 0.orig 0
+    
+    # create background mesh
+    echo "creating background mesh"
+    blockMesh > $dir/log.blockMesh
+    
+    # refine mesh with snappy
+    echo "refining mesh"
+    snappyHexMesh -overwrite > $dir/log.snappyHexMesh
+    
+    # check the mesh
+    echo "checking mesh"
+    checkMesh > $dir/log.checkMesh  
+    
+    # echo how many cells were created  
+    echo " -- mesh --"
+    grep "cells:" $dir/log.checkMesh
+   
+    
+}
+
+solve_local() {
+    # CURRENTLY THE SAME AS SOLVE_SINGLE
+
+    echo "Running in local mode..."
+    echo "Executing task..."
+
+    # make dir for logs file       
+    mkdir logs -p
+    dir="logs"
+    
+    # copy the 0 directory
+    echo "copying 0 directory"
+    cp -r 0.orig 0
+    
+    # create background mesh
+    echo "creating background mesh"
+    blockMesh > $dir/log.blockMesh
+    
+    # check how man subdomains we are using
+    nbSubdomains=$(grep -oP 'nbSubdomains\s+\K\d+' setUp)
+    
+    # now refine mesh in parallel (THIS CAUSES SOME ISSUES)
+    #echo "decompose case into $nbSubdomains subdomains"
+    #decomposePar -force > log.decomposePar
+    #echo "refining mesh"
+    #mpirun -np $nbSubdomains snappyHexMesh -parallel > log.snappyHexMesh
+    
+    # for now just refine on a single core
+    echo "refining mesh"
+    snappyHexMesh -overwrite > $dir/log.snappyHexMesh
+
+    #echo "reconstruct mesh"	    
+    #reconstructParMesh -mergeTol 1e-06 -latestTime > log.reconstructParMesh
+
+    echo "checking mesh"
+    #mpirun -np $nbSubdomains checkMesh -parallel > log.checkMesh
+    checkMesh > $dir/log.checkMesh
+    
+    # echo how many cells were created  
+    echo " -- mesh --"
+    grep "cells:" $dir/log.checkMesh
+    
+}
+
+
+solve_cluster() {
+    dir="logs/$SlURM_JOB_ID"
+    mkdir $dir -p
+	
+    echo "Running in cluster mode..." >  $dir/log.preprocess
+    echo "Executing tasks..." >> $dir/log.preprocess
+    
+    # copy the 0 directory
+    echo "copying 0 directory" >> $dir/log.preprocess
+    cp -r 0.orig 0 > $dir/log.cp0
+
+    # create background mesh
+    echo "creating background mesh" >> $dir/log.preprocess
+    blockMesh > log.blockMesh > $dir/log.blockMesh
+	
+    # this needs to be changed to parallel really(!)
+    # refine mesh with snappy
+    echo "refining mesh" >> $dir/log.preprocess
+    snappyHexMesh -overwrite > $dir/log.snappyHexMesh
+
+    # check the mesh
+    echo "checking mesh" >> $dir/log.preprocess
+    checkMesh > $dir/log.checkMesh
+
+    # echo how many cells were created  
+    echo " -- mesh --" >> $dir/log.preprocess
+    grep "cells:" log.checkMesh >> $dir/log.preprocess
+
+    
+}
+
+# Check if at least one argument is provided
+if [ $# -eq 0 ]; then
+    echo "No mode specified. Please use -single, -local or -parallel."
+    exit 1
+fi
+
+# Parse command-line arguments
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+    	-single) solve_single; shift ;;
+        -local) solve_local; shift ;;
+        -cluster) solve_cluster; shift ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 -single | -local | -cluster"
+            exit 1
+            ;;
+    esac
+done

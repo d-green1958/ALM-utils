@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Function to ask the user for confirmation
+confirm() {
+    read -p "Are you sure? (y/n): " response
+    case "$response" in
+        [yY][eE][sS]|[yY])
+            return 0  # User confirmed with 'y'
+            ;;
+        [nN][oO]|[nN])
+            return 1  # User declined with 'n'
+            ;;
+        *)
+            echo "Invalid input. Please enter 'y' or 'n'."
+            confirm  # Recursively ask for confirmation again
+            ;;
+    esac
+}
+
+
+if confirm; then
+    rm -r processor* 
+    rm logs/log.*
+else
+    exit 1
+fi
