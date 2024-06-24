@@ -148,7 +148,7 @@ def read_data_from_dir(dir):
 
     return turbine_base_arr, turbine_dir_arr, turbine_radius_arr, turbine_tower_height_arr
 
-def write_vtk(base_loc, direction, radius, tower_height):
+def write_vtk(base_loc, direction, radius, tower_height, vtk_dir):
     points = vtk.vtkPoints()
     file_name = "Rotors.vtk"
     
@@ -156,9 +156,6 @@ def write_vtk(base_loc, direction, radius, tower_height):
     append_filter = vtk.vtkAppendPolyData()
 
     for base, angle, rad, height in zip(base_loc, direction, radius, tower_height):
-        # need to find the base location iin (x,y,z)
-        # center = circle["center"] this needs to be changed to be tower height above the base location
-        center = None # just for now
 
         base_split = base.split(" ")
         x = float(base_split[0])
@@ -176,6 +173,7 @@ def write_vtk(base_loc, direction, radius, tower_height):
     writer = vtk.vtkPolyDataWriter()
     writer.SetFileName(file_name)
     writer.SetInputData(append_filter.GetOutput())
+    os.chdir(vtk_dir)
     writer.Write()
     print("write: done")
 
@@ -193,14 +191,21 @@ def main():
             print(f"Directory {test_dir} is not valid!")
             sys.exit(1)
     else:
-        print(f"Usage: createRotorVTK [<case dir>]")
+        print(f"Usage: utilCreateRotorVTK [<case dir>]")
         sys.exit(1)
 
     print(f"directory: {dir_path}")
 
     base_loc, direction, radius, tower_height = read_data_from_dir(dir=dir_path)
-    print(f"writing VTK to {os.getcwd()}")
-    write_vtk(base_loc, direction, radius, tower_height)
+    
+    vtk_dir = os.path.join(dir_path, "VTK")
+    if not os.path.isdir(vtk_dir):
+        os.mkdir(vtk_dir)
+        print(f"making VTK directory: {vtk_dir}")
+    else:
+        print(f"found VTK directory: {vtk_dir}")
+
+    write_vtk(base_loc, direction, radius, tower_height, vtk_dir)
 
 
     
