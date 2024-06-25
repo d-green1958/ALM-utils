@@ -113,8 +113,9 @@ def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
     fig.suptitle(f"Spanwise forces at t={plot_time}s")
     fig.tight_layout()
     
-def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
-    fig = plt.figure()
+def plot_power_and_thrust_convergence(data, start_time = None, end_time = None, rotor_time_period = None):
+    fig, ax1 = plt.subplots()
+    
     
     power = data["powerRotor"]
     thrust = data["thrust"]
@@ -148,13 +149,28 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
     power_residual = np.abs((power - power_final)/power_final)
     thrust_residual = np.abs((thrust - thrust_final)/thrust_final)
     
-    plt.plot(times, power_residual, label = "power")
-    plt.plot(times, thrust_residual, label = "thrust")
-    plt.yscale("log")
-    plt.title("Power/Thrust Convergence")
-    plt.ylabel(r"$\frac{\Delta q}{q}$")
-    plt.xlabel("time s")
-    plt.legend()
-    plt.grid(True)
+    ax1.plot(times, power_residual, label = "power")
+    ax1.plot(times, thrust_residual, label = "thrust")
+    ax1.set_yscale("log")
+    ax1.set_ylabel(r"$\frac{\Delta q}{q}$")
+    ax1.set_xlabel("time s")
+    ax1.legend()
+    ax1.grid(True)
+    
+    ax2 = ax1.twiny()
+    ax2.set_xlim(ax1.get_xlim())
+
+    nondimensional_times = times/rotor_time_period
+    num_periods = (end_time-start_time)/rotor_time_period
+    num_ticks =  int(num_periods*4) # Number of desired ticks
+    tick_indices = np.linspace(0, len(times) - 1, num_ticks, dtype=int)
+    ax2.set_xticks(times[tick_indices])
+    ax2.set_xticklabels(nondimensional_times[tick_indices])
+
+    ax2.set_xlabel('t/T')
+
+    plt.title('Power and Torque Convergence')
+    plt.tight_layout()
+        
 
     

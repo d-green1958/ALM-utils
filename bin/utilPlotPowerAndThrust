@@ -51,7 +51,6 @@ def main():
     data = turbineOutput.read_file(dir_path, ['powerRotor','thrust', "turbineArrayProperties"])
     times, power_and_torque_data = turbineOutput.process_power_and_thrust(data)
     
-    
     # adjust the start and end times accordingly
     time_limit_set = False
     if args.startTime != None:
@@ -64,7 +63,7 @@ def main():
         if time_limit_set:
             print("cannot set a time limit (start/end) and use lastPeriod")
             sys.exit(1)
-        
+            
         rotor_rpm = data["turbineArrayProperties"]["turbine0"]["RotSpeed"]
         rotor_time_period = 2.0*np.pi/rotor_rpm
         
@@ -91,9 +90,9 @@ def main():
     
     ## now plot for the different methods
     if args.timeSeries:
-        plot.plot_power_and_thrust_time_series(power_and_torque_data, args.startTime, args.endTime)
+        plot.plot_power_and_thrust_time_series(power_and_torque_data, args.startTime, args.endTime, rotor_time_period)
     if args.convergence:
-        plot.plot_power_and_thrust_convergence(power_and_torque_data, args.startTime, args.endTime)
+        plot.plot_power_and_thrust_convergence(power_and_torque_data, args.startTime, args.endTime, rotor_time_period)
     plt.show()
     
     
