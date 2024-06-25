@@ -145,14 +145,16 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
     power_final = power[-1]
     thrust_final = thrust[-1]
     
-    power_residual = abs((power - power_final)/power_final)
-    thrust_residual = abs((thrust - thrust_final)/thrust_final)
+    print("num of points", len(thrust))
+    
+    power_residual = np.abs((power - power_final)/power_final)
+    thrust_residual = np.abs((thrust - thrust_final)/thrust_final)
     
     plt.plot(times, power_residual, label = "power")
     plt.plot(times, thrust_residual, label = "thrust")
     plt.yscale("log")
     plt.title("Power/Thrust Convergence")
-    plt.ylabel("$\Delta q / q")
+    plt.ylabel(r"$\Delta q / q")
     plt.xlabel("time s")
     plt.legend()
     plt.grid(True)
