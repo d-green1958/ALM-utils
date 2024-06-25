@@ -84,7 +84,7 @@ def main():
         
         print(f"rotor time period is {rotor_time_period}")
         final_time = times[-1]
-        inds, nearest_time = analysis.find_nearest_time(final_time - args.lastNPeriods * rotor_time_period, times)
+        inds, nearest_time = analysis.find_nearest_time(final_time - rotor_time_period * args.lastNPeriods, times)
         args.startTime = nearest_time
         args.endTime = final_time
     

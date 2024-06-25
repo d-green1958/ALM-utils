@@ -20,9 +20,9 @@ def plot_power_and_thrust_time_series(data, start_time = None, end_time = None):
         inds, nearest_time = find_nearest_time(start_time, times)
         print(f"plotting time series from {nearest_time}")
         start_ind = inds[0]
-        times = times[start_ind::]
-        power = power[start_ind::]
-        thrust = thrust[start_ind::]
+        times = times[start_ind:]
+        power = power[start_ind:]
+        thrust = thrust[start_ind:]
     
     
     if end_time == None:
@@ -31,9 +31,9 @@ def plot_power_and_thrust_time_series(data, start_time = None, end_time = None):
         inds, nearest_time = find_nearest_time(end_time, times)
         print(f"plotting time series until {nearest_time}")
         end_ind = inds[0]
-        times = times[::end_ind]
-        power = power[::end_ind]
-        thrust = thrust[::end_ind]
+        times = times[:end_ind]
+        power = power[:end_ind]
+        thrust = thrust[:end_ind]
         
     
     fig, ax1 = plt.subplots()
@@ -126,10 +126,10 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
         inds, nearest_time = find_nearest_time(start_time, times)
         print(f"plotting time series from {nearest_time}")
         start_ind = inds[0]
-        times = times[start_ind::]
-        power = power[start_ind::]
-        thrust = thrust[start_ind::]
-    
+        times = times[start_ind:]
+        power = power[start_ind:]
+        thrust = thrust[start_ind:]
+            
     
     if end_time == None:
         print(f"plotting time series until {times[-1]}")
@@ -137,15 +137,13 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
         inds, nearest_time = find_nearest_time(end_time, times)
         print(f"plotting time series until {nearest_time}")
         end_ind = inds[0]
-        times = times[::end_ind]
-        power = power[::end_ind]
-        thrust = thrust[::end_ind]
-     
+        times = times[:end_ind]
+        power = power[:end_ind]
+        thrust = thrust[:end_ind]     
     
     power_final = power[-1]
     thrust_final = thrust[-1]
     
-    print("num of points", len(thrust))
     
     power_residual = np.abs((power - power_final)/power_final)
     thrust_residual = np.abs((thrust - thrust_final)/thrust_final)
@@ -154,7 +152,7 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
     plt.plot(times, thrust_residual, label = "thrust")
     plt.yscale("log")
     plt.title("Power/Thrust Convergence")
-    plt.ylabel(r"$\Delta q / q")
+    plt.ylabel(r"$\frac{\Delta q}{q}$")
     plt.xlabel("time s")
     plt.legend()
     plt.grid(True)
