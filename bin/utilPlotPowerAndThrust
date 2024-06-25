@@ -1,3 +1,40 @@
 #!/usr/bin/env python3
 
-print("in development")
+import os
+import sys
+import argparse
+import matplotlib.pyplot as plt
+
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from src import turbineOutput
+from src import plot
+
+
+
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Plot streamwise force distribution.')
+    parser.add_argument('directory', nargs='?', default=os.getcwd(),
+                        help='Optional directory path to plot residuals for (default: current directory)')
+    args = parser.parse_args()
+    
+    # check case directory exists
+    dir_path = os.path.abspath(args.directory)
+    if not os.path.isdir(dir_path):
+        print(f"Directory '{dir_path}' is not valid!")
+        sys.exit(1)
+        
+    data = turbineOutput.read_file(dir_path, ['powerRotor','thrust'])
+    times, power_and_torque_data = turbineOutput.process_power_and_thrust(data)
+    
+    plot.plot_power_and_thrust_time_series(power_and_torque_data)
+    plt.show()
+    
+    
+    
+    
+
+if __name__ == "__main__":
+    main()

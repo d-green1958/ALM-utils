@@ -51,7 +51,10 @@ def read_file(case_path, file_names):
 
 
 
-def process_spanwise_forces(data, keys):
+def process_spanwise_forces(data, keys = ["axialForce", "tangentialForce"]):
+    # here the keys argument has been included since might also want to plot normal or chordwise forces
+    # but this has not been implemented into the main calling this.
+    
     forces = {}
     times_defined = False
     for key in keys:
@@ -114,3 +117,40 @@ def process_radius(data):
         sys.exit(1)
     
     return radial_pos[0]
+
+def process_power_and_thrust(data):
+    keys = ["powerRotor", "thrust"]
+    output = {}
+    
+    times_set = False
+    for key in keys:
+        if key not in data.keys():
+            print(f"{key} not in data")
+            sys.exit(1)
+        
+        key_data = data[key]
+        if times_set:
+            if key_data[:,1].any() != times.any():
+                print("there are differences in the time series between rotor and power")
+                sys.exit(1)
+        
+        times = key_data[:,1]
+        times_set = True
+        
+        output[key] = key_data[:,3]
+    output["times"] = times
+    
+    return times, output
+            
+        
+        
+        
+        
+        
+         
+                      
+    
+    
+    
+    
+    return None, None, None
