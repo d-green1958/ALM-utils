@@ -48,7 +48,6 @@ def plot_power_and_thrust_time_series(data, start_time, end_time, rotor_time_per
     ax2.set_ylabel('Thrust N', color='r')
     ax2.tick_params(axis='y', labelcolor='r')
 
-    fig.tight_layout()
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
     ax1.grid(True)
@@ -66,6 +65,7 @@ def plot_power_and_thrust_time_series(data, start_time, end_time, rotor_time_per
 
     ax3.set_xlabel('t/T')
     
+    fig.tight_layout()
     print("plotting power and torque time series")
     
     
@@ -184,6 +184,7 @@ def plot_power_and_thrust_convergence(data, start_time, end_time, rotor_time_per
 
     plt.title('Power and Torque Convergence')
     plt.tight_layout()
-        
+    print("plotting power and torque convergence time series")
+
 
     
