@@ -165,7 +165,7 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None, 
     num_ticks =  int(num_periods*4) # Number of desired ticks
     tick_indices = np.linspace(0, len(times) - 1, num_ticks, dtype=int)
     ax2.set_xticks(times[tick_indices])
-    formatted_labels = [f"{x:.2g}" for x in nondimensional_times[tick_indices]]
+    formatted_labels = [f"{x:.2f}" for x in nondimensional_times[tick_indices]]
     ax2.set_xticklabels(formatted_labels)
 
     ax2.set_xlabel('t/T')
