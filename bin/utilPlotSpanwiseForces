@@ -165,9 +165,9 @@ def main():
         sys.exit(1)
 
     data = turbineOutput.read_file(dir_path, ["axialForce", "tangentialForce", "radiusC"])
-    radial_pos = process_radius(data)
-    times, forces = process_spanwise_forces(data, ["axialForce", "tangentialForce"])
-    
+    radial_pos = turbineOutput.process_radius(data)
+    times, forces = turbineOutput.process_spanwise_forces(data, ["axialForce", "tangentialForce"])
+        
     if args.latestTime:
         plot_instantaneous_spanwise_forces(radial_pos, times, forces, times[-1])
     
