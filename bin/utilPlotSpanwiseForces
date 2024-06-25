@@ -9,128 +9,136 @@ import argparse
 import subprocess
 
 
-print("in development")
-
-def read_radial_pos(case_path):
+def read_turbineOutput_file(case_path, file_names):
     print(f"reading from {case_path}")
     
+    # make sure turbineOutput exists
     turbine_output_path = os.path.join(case_path, "turbineOutput")
     if not os.path.isdir(turbine_output_path):
         print("no turbineOutput directory")
         sys.exit(1)
-        
-    turbine0_path = os.path.join(turbine_output_path, "0")
-    if not os.path.isdir(turbine0_path):
-        print(f"no 0 directory [{turbine0_path}]")
-        sys.exit(1)
     
-    # first read in the radius values
-    radius_file = os.path.join(turbine0_path, "radiusC")
-    if not os.path.exists(radius_file):
-        print("no radiusC file")
-        sys.exit(1)
-        
-        
-    rotor_nums = []
-    blade_nums = []
-    rad_arrs = []
-    data = []
-    with open(radius_file, 'r') as file:
-        lines = file.readlines()
+    # look for different runs
+    run_dirs = os.listdir(turbine_output_path)
+    if len(run_dirs) == 1:
+        print(f"reading from results file {run_dirs[0]}")
+        turbine_output_path = os.path.join(turbine_output_path, run_dirs[0])
+    elif len(run_dirs) > 1:
+        # if there are multiple ask for one
+        print(f"multiple results paths found:")
+        for run_dir in run_dirs:
+            print(f"-- {run_dir} --")
+
+        choice_made = False
+        while not choice_made:
+            choice = input("please choose one")
+            if choice not in run_dirs:
+                print("invalid response")
+            else:
+                choice_made = True
+                turbine_output_path = os.path.join(turbine_output_path, choice)
          
-    for line in lines:
-        values = line.strip().split()
-        if len(values) != 0:
-            data.append(values)
+    # create dictionary for data storage       
+    data = {}
+    for file_name in file_names:
+        # check file exists
+        file_path = os.path.join(turbine_output_path, file_name)
+        if not os.path.exists(file_path):
+            print(f"no file: {file_path}")
         
-    for line in data:
-        try:
-            rotor_nums.append(float(line[0]))
-        except ValueError:
-            continue
+        print(f"-- reading {file_name} --", end=' ')
         
-        blade_nums.append(line[1])
-        rad_arrs.append(line[2::])
+        # read in data from file
+        data[file_name] = np.genfromtxt(file_path, delimiter=' ')
+        print(" |done|")
+        
+    # return the dict
+    return data
+        
+def process_radius(data):
+    keys = data.keys()
+    if "radiusC" not in keys:
+        print("radiusC not found in data")
+        sys.exit(1)
     
-    for value in rotor_nums:
-        if value != 0:
-            print("more than one rotor [not implemented]")
+    rad_data = data["radiusC"]
+    
+    # get number of rotors
+    rotor_ids = np.unique(rad_data[:,0])
+    if len(rotor_ids) != 1:
+        print("number of rotors != 1")
+        sys.exit(1)
+    
+    # get number of blades
+    blade_ids = np.unique(rad_data[:,1])
+    if len(blade_ids) != 3:
+        print("number of blades != 3 [not implemented, may cause issues]")
+        sys.exit(1)
+    
+    # check for symmetry of rotor
+    radial_pos = rad_data[:,2::]
+    if (radial_pos[0].any() != radial_pos[1].any()) or (radial_pos[1].any() != radial_pos[2].any()):
+        print("rotor is assymetric [not implemented]")
+        sys.exit(1)
+    
+    return radial_pos[0]
+
+def process_spanwise_forces(data, keys):
+    forces = {}
+    times_defined = False
+    for key in keys:
+        if key not in data.keys():
+            print(f"{key} not in data")
+            sys.exit(1)
+            
+        force_data = data[key]
+        if len(np.unique(force_data[:,0])) != 1:
+            print("number of rotors != 1 [not implemented]")
+            sys.exit(1)
+        if len(np.unique(force_data[:,1])) != 3:
+            print("number of blades != 3 [not implemented]")
             sys.exit(1)
         
-    
-    if (rad_arrs[0] == rad_arrs[1]) and (rad_arrs[1] == rad_arrs[2]):
-        print("rotor is symmetrical")
-        rad = rad_arrs[0]
-        print("radius data read")
-    else:
-        print("rotor is not symmetric [not implemented]")
-        sys.exit(1)
+        blade_forces = [] # [blade number][time step][position on blade]
+        if times_defined == True:
+            if times.any() != np.unique(force_data[:,2]).any():
+                print("inconsistent times between force keys")
+                sys.exit(1)
         
+        times = np.unique(force_data[:,2])
+        times_defined = True
+        blade_ids = np.unique(force_data[:,1])
         
-    rad = np.array(rad)
-    return rad
-
-
-
-def read_forces(case_path):
-    print(f"reading from {case_path}")
-    
-    turbine_output_path = os.path.join(case_path, "turbineOutput")
-    if not os.path.isdir(turbine_output_path):
-        print("no turbineOutput directory")
-        sys.exit(1)
+        for blade_id in blade_ids:
+            inds = (force_data[:,1] == blade_id)
+            temp = force_data[inds,4::]
+            blade_forces.append(temp)
         
-    turbine0_path = os.path.join(turbine_output_path, "0")
-    if not os.path.isdir(turbine0_path):
-        print(f"no 0 directory [{turbine0_path}]")
-        sys.exit(1)
-    
-    # now read in the forces
-    ax_force_path = os.path.join(turbine0_path, "axialForce")
-    if not os.path.exists(ax_force_path):
-        print("no axialForce file")
-        sys.exit(1)
+        forces[key] = blade_forces
+        forces["times"] = times
+                    
+    return times, forces
         
-    data = pd.read_csv(ax_force_path, delim_whitespace=True, comment='#')
-    rotor_num = data.iloc[:,0]
+def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
+    number_of_keys = len(forces.keys())
+    if "times" in forces.keys():
+        number_of_keys -= 1
     
-    if all(rotor_num) != 0:
-        print("multiple rotors [not implemented]") 
-    
-    times = data.iloc[:,2]
-    num_times = len(times.unique())
-    print(f"reading {num_times} timesteps")
-    
-    blades = data.iloc[:,1]
-    num_blades = len(blades.unique())
-    print(f"rotor has {num_blades} blades")
-    
-    ax_forces = data.iloc[:,4::]
-    
-    times = np.array(times)
-    blades = np.array(blades)
-    ax_forces = np.array(ax_forces)
-    
-    return times, blades, ax_forces
-
-
-def plot_instant_forces(radial_pos, times, blades, ax_forces, plot_time):
     # find the index of the target time
     difs = times - [plot_time]*len(times)
     abs_difs = abs(difs)
-    
     min_value = min(abs_difs)
     inds = [i for i, x in enumerate(abs_difs) if x == min_value]
-    
+    time_index = inds[0]
     nearest_time = times[inds[0]]
     if nearest_time != plot_time:
-        print(f'trying to plot at {plot_time}s')
-        print(f'-- nearest time is {times[inds[0]]}s --')
+        print(f'trying to plot at {plot_time}s', end= ' ')
+        print(f'--> nearest time is {times[time_index]}s [timestep: {time_index}]')
         plot_time = nearest_time
-
     else:
         print(f"plotting at time {plot_time}s")
     
+    # normalise the radial distances
     num_points = len(radial_pos)
     radial_pos = [float(val) for val in radial_pos]
     max_rad = max(radial_pos)
@@ -143,58 +151,76 @@ def plot_instant_forces(radial_pos, times, blades, ax_forces, plot_time):
     for index, elem in enumerate(radial_pos):
         if (index>=1 and index < num_points-1):
             element_length[index] = (radial_pos[index+1]-radial_pos[index])
-                
+    
+    
+    # create the subplots
+    fig, axs = plt.subplots(1,number_of_keys)
+    plot_counter = 0
+    
+    for key in forces.keys():
+        if key == "times":
+            continue
+        force_data = forces[key]
+        for blade_id in range(len(force_data)):
+            force = force_data[blade_id][time_index]
             
-    fig = plt.figure(num = f"Forces at {plot_time}")
-    for ind in inds:
-        blade = blades[ind]
-        time = plot_time
-        
-        plt.plot(radial_pos_normalised, ax_forces[ind]/element_length, label=f"blade {blade}", marker="+")
-      
-    plt.xlabel("$r/R$")          
-    plt.legend()
-        
-        
+            force_per_length = force/element_length            
+            axs[plot_counter].plot(radial_pos_normalised, force_per_length, label=f"blade {blade_id}")
+            axs[plot_counter].set_title(key)
+            axs[plot_counter].grid(True)
+            axs[plot_counter].set_ylabel("Force [N]")
+            axs[plot_counter].set_xlabel("r/R")
+            
+        plot_counter += 1
     
-    
-    
-    
-    
-    
-    
+    fig.suptitle(f"Spanwise forces at t={plot_time}s")
+    fig.tight_layout()
+              
         
     
-
-
+    
+    
 def main():
     parser = argparse.ArgumentParser(description='Plot streamwise force distribution.')
     parser.add_argument('directory', nargs='?', default=os.getcwd(),
                         help='Optional directory path to plot residuals for (default: current directory)')
     parser.add_argument('-instantTime', type=float, help='Plot at some time.')
-    
-    
+    parser.add_argument('-latestTime', action='store_true',help='Flag to plot at the latest time.')
     args = parser.parse_args()
     
+    plot_something = False
+    if args.latestTime:
+        print("plotting final time")
+        plot_something = True
+    
+    if args.instantTime is not None:
+        print(f"Instant time: {args.instantTime}")
+        plot_something = True
+        
+    if plot_something == False:
+        print("no flags given")
+        sys.exit(1)
+    
+    # check case directory exists
     dir_path = os.path.abspath(args.directory)
     if not os.path.isdir(dir_path):
         print(f"Directory '{dir_path}' is not valid!")
         sys.exit(1)
 
-    radial_pos = read_radial_pos(case_path=dir_path)
-    times, blades, ax_forces = read_forces(case_path=dir_path)
+    data = read_turbineOutput_file(dir_path, ["axialForce", "tangentialForce", "radiusC"])
+    radial_pos = process_radius(data)
+    times, forces = process_spanwise_forces(data, ["axialForce", "tangentialForce"])
     
+    if args.latestTime:
+        plot_instantaneous_spanwise_forces(radial_pos, times, forces, times[-1])
     
     if args.instantTime is not None:
-        plot_time = args.instantTime
-        plot_instant_forces(radial_pos, times, blades, ax_forces, plot_time)
-    else:
-        print("No instant time value provided.")
-        sys.exit(1)    
-        
-        
-        
+        plot_instantaneous_spanwise_forces(radial_pos, times, forces, args.instantTime)
+    
+    
     plt.show()
+    
+    return
 
 if __name__ == "__main__":
     main()    
