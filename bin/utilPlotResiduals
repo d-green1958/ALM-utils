@@ -100,28 +100,6 @@ def plot_residuals(case_path, lastPeriod, allTime):
 
 
 
-    
-
-
-
-
-
-# def main():
-#     if len(sys.argv) == 1:
-#         dir_path = os.getcwd()
-#     elif len(sys.argv) == 2:
-#         test_dir = sys.argv[1]
-#         if os.path.isdir(test_dir):
-#             dir_path = os.path.abspath(test_dir)
-#         else:
-#             print(f"Directory {test_dir} is not valid!")
-#             sys.exit(1)
-#     else:
-#         print(f"Usage: utilPlotResiduals [<case dir>]")
-#         sys.exit(1)
-
-#     plot_residuals(dir_path)
-#     plt.show()
 
 def main():
     parser = argparse.ArgumentParser(description='Plot residuals for a directory.')

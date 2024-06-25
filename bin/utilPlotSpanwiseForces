@@ -1,0 +1,200 @@
+#!/usr/bin/env python3
+
+import numpy as np
+import matplotlib.pyplot as plt
+import sys
+import os
+import pandas as pd
+import argparse
+import subprocess
+
+
+print("in development")
+
+def read_radial_pos(case_path):
+    print(f"reading from {case_path}")
+    
+    turbine_output_path = os.path.join(case_path, "turbineOutput")
+    if not os.path.isdir(turbine_output_path):
+        print("no turbineOutput directory")
+        sys.exit(1)
+        
+    turbine0_path = os.path.join(turbine_output_path, "0")
+    if not os.path.isdir(turbine0_path):
+        print(f"no 0 directory [{turbine0_path}]")
+        sys.exit(1)
+    
+    # first read in the radius values
+    radius_file = os.path.join(turbine0_path, "radiusC")
+    if not os.path.exists(radius_file):
+        print("no radiusC file")
+        sys.exit(1)
+        
+        
+    rotor_nums = []
+    blade_nums = []
+    rad_arrs = []
+    data = []
+    with open(radius_file, 'r') as file:
+        lines = file.readlines()
+         
+    for line in lines:
+        values = line.strip().split()
+        if len(values) != 0:
+            data.append(values)
+        
+    for line in data:
+        try:
+            rotor_nums.append(float(line[0]))
+        except ValueError:
+            continue
+        
+        blade_nums.append(line[1])
+        rad_arrs.append(line[2::])
+    
+    for value in rotor_nums:
+        if value != 0:
+            print("more than one rotor [not implemented]")
+            sys.exit(1)
+        
+    
+    if (rad_arrs[0] == rad_arrs[1]) and (rad_arrs[1] == rad_arrs[2]):
+        print("rotor is symmetrical")
+        rad = rad_arrs[0]
+        print("radius data read")
+    else:
+        print("rotor is not symmetric [not implemented]")
+        sys.exit(1)
+        
+        
+    rad = np.array(rad)
+    return rad
+
+
+
+def read_forces(case_path):
+    print(f"reading from {case_path}")
+    
+    turbine_output_path = os.path.join(case_path, "turbineOutput")
+    if not os.path.isdir(turbine_output_path):
+        print("no turbineOutput directory")
+        sys.exit(1)
+        
+    turbine0_path = os.path.join(turbine_output_path, "0")
+    if not os.path.isdir(turbine0_path):
+        print(f"no 0 directory [{turbine0_path}]")
+        sys.exit(1)
+    
+    # now read in the forces
+    ax_force_path = os.path.join(turbine0_path, "axialForce")
+    if not os.path.exists(ax_force_path):
+        print("no axialForce file")
+        sys.exit(1)
+        
+    data = pd.read_csv(ax_force_path, delim_whitespace=True, comment='#')
+    rotor_num = data.iloc[:,0]
+    
+    if all(rotor_num) != 0:
+        print("multiple rotors [not implemented]") 
+    
+    times = data.iloc[:,2]
+    num_times = len(times.unique())
+    print(f"reading {num_times} timesteps")
+    
+    blades = data.iloc[:,1]
+    num_blades = len(blades.unique())
+    print(f"rotor has {num_blades} blades")
+    
+    ax_forces = data.iloc[:,4::]
+    
+    times = np.array(times)
+    blades = np.array(blades)
+    ax_forces = np.array(ax_forces)
+    
+    return times, blades, ax_forces
+
+
+def plot_instant_forces(radial_pos, times, blades, ax_forces, plot_time):
+    # find the index of the target time
+    difs = times - [plot_time]*len(times)
+    abs_difs = abs(difs)
+    
+    min_value = min(abs_difs)
+    inds = [i for i, x in enumerate(abs_difs) if x == min_value]
+    
+    nearest_time = times[inds[0]]
+    if nearest_time != plot_time:
+        print(f'trying to plot at {plot_time}s')
+        print(f'-- nearest time is {times[inds[0]]}s --')
+        plot_time = nearest_time
+
+    else:
+        print(f"plotting at time {plot_time}s")
+    
+    num_points = len(radial_pos)
+    radial_pos = [float(val) for val in radial_pos]
+    max_rad = max(radial_pos)
+    radial_pos_normalised = [((val)/max_rad) for val in radial_pos] 
+    
+    # find distances between points
+    element_length = np.zeros(num_points)
+    element_length[0] = radial_pos[1]-radial_pos[0]
+    element_length[-1] = radial_pos[-1]-radial_pos[-2]
+    for index, elem in enumerate(radial_pos):
+        if (index>=1 and index < num_points-1):
+            element_length[index] = (radial_pos[index+1]-radial_pos[index])
+                
+            
+    fig = plt.figure(num = f"Forces at {plot_time}")
+    for ind in inds:
+        blade = blades[ind]
+        time = plot_time
+        
+        plt.plot(radial_pos_normalised, ax_forces[ind]/element_length, label=f"blade {blade}", marker="+")
+      
+    plt.xlabel("$r/R$")          
+    plt.legend()
+        
+        
+    
+    
+    
+    
+    
+    
+    
+        
+    
+
+
+def main():
+    parser = argparse.ArgumentParser(description='Plot streamwise force distribution.')
+    parser.add_argument('directory', nargs='?', default=os.getcwd(),
+                        help='Optional directory path to plot residuals for (default: current directory)')
+    parser.add_argument('-instantTime', type=float, help='Plot at some time.')
+    
+    
+    args = parser.parse_args()
+    
+    dir_path = os.path.abspath(args.directory)
+    if not os.path.isdir(dir_path):
+        print(f"Directory '{dir_path}' is not valid!")
+        sys.exit(1)
+
+    radial_pos = read_radial_pos(case_path=dir_path)
+    times, blades, ax_forces = read_forces(case_path=dir_path)
+    
+    
+    if args.instantTime is not None:
+        plot_time = args.instantTime
+        plot_instant_forces(radial_pos, times, blades, ax_forces, plot_time)
+    else:
+        print("No instant time value provided.")
+        sys.exit(1)    
+        
+        
+        
+    plt.show()
+
+if __name__ == "__main__":
+    main()    
