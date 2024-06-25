@@ -18,6 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description='Plot streamwise force distribution.')
     parser.add_argument('directory', nargs='?', default=os.getcwd(),
                         help='Optional directory path to plot residuals for (default: current directory)')
+    
     args = parser.parse_args()
     
     # check case directory exists
