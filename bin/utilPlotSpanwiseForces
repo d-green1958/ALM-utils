@@ -166,11 +166,12 @@ def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
             
             force_per_length = force/element_length            
             axs[plot_counter].plot(radial_pos_normalised, force_per_length, label=f"blade {blade_id}")
-            axs[plot_counter].set_title(key)
-            axs[plot_counter].grid(True)
-            axs[plot_counter].set_ylabel("Force [N]")
-            axs[plot_counter].set_xlabel("r/R")
-            axs[plot_counter].legend()
+            
+        axs[plot_counter].set_title(key)
+        axs[plot_counter].grid(True)
+        axs[plot_counter].set_ylabel("Force [N]")
+        axs[plot_counter].set_xlabel("r/R")
+        axs[plot_counter].legend()
             
         plot_counter += 1
     
