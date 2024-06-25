@@ -18,7 +18,7 @@ def main():
     parser = argparse.ArgumentParser(description='Plot streamwise force distribution.')
     parser.add_argument('directory', nargs='?', default=os.getcwd(),
                         help='Optional directory path to plot residuals for (default: current directory)')
-    parser.add_argument('-instantTime', type=float, help='Plot at some time.')
+    parser.add_argument('-instantTime', type=float, help='Plot at specified time.')
     parser.add_argument('-latestTime', action='store_true',help='Flag to plot at the latest time.')
     args = parser.parse_args()
     

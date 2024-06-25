@@ -18,7 +18,19 @@ def main():
     parser = argparse.ArgumentParser(description='Plot streamwise force distribution.')
     parser.add_argument('directory', nargs='?', default=os.getcwd(),
                         help='Optional directory path to plot residuals for (default: current directory)')
-    
+    parser.add_argument('-timeSeries', action='store_true', default=False,
+                    help='Flag to indicate if time series should be plotted (default: False)')
+    parser.add_argument('-SPD', action='store_true', default=False,
+                        help='Flag to indicate if SPD should be considered (default: False)')
+    parser.add_argument('-convergence', action='store_true', default=False,
+                        help='Flag to indicate if convergence should be checked (default: False)')
+    parser.add_argument('-startTime', type=float, default=None,
+                        help='Start time for plotting (default: None)')
+    parser.add_argument('-endTime', type=float, default=None,
+                        help='End time for plotting (default: None)')
+    parser.add_argument('-lastPeriod', action='store_true', default=False,
+                        help='Flag to indicate if the last period should be considered (default: False)')
+
     args = parser.parse_args()
     
     # check case directory exists
@@ -27,10 +39,29 @@ def main():
         print(f"Directory '{dir_path}' is not valid!")
         sys.exit(1)
         
+    plot_something = False
+    if args.timeSeries or args.SPD or args.convergence:
+        plot_something = True
+    else:
+        print("no flags provided")
+        sys.exit(1)
+    
     data = turbineOutput.read_file(dir_path, ['powerRotor','thrust'])
     times, power_and_torque_data = turbineOutput.process_power_and_thrust(data)
     
-    plot.plot_power_and_thrust_time_series(power_and_torque_data)
+       
+    
+    
+    if args.timeSeries:
+        plot.plot_power_and_thrust_time_series(power_and_torque_data)
+    if args.SPD:
+        ## plot the SPD
+        print("implement this")
+    if args.convergence:
+        ## plot the convergennce#
+        print("implement this")
+
+    
     plt.show()
     
     

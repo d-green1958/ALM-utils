@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import sys
+from .analysis import find_nearest_time
 
 def plot_power_and_thrust_time_series(data, start_time = None, end_time = None):
     keys = ["powerRotor","thrust","times"]
@@ -39,13 +40,10 @@ def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
     if "times" in forces.keys():
         number_of_keys -= 1
     
-    # find the index of the target time
-    difs = times - [plot_time]*len(times)
-    abs_difs = abs(difs)
-    min_value = min(abs_difs)
-    inds = [i for i, x in enumerate(abs_difs) if x == min_value]
+    # round to the nearest time
+    inds, nearest_time = find_nearest_time(plot_time, times)
     time_index = inds[0]
-    nearest_time = times[inds[0]]
+    
     if nearest_time != plot_time:
         print(f'trying to plot at {plot_time}s', end= ' ')
         print(f'--> nearest time is {times[time_index]}s [timestep: {time_index}]')
