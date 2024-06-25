@@ -3,7 +3,7 @@ import numpy as np
 import sys
 from .analysis import find_nearest_time
 
-def plot_power_and_thrust_time_series(data, start_time = None, end_time = None):
+def plot_power_and_thrust_time_series(data, start_time, end_time, rotor_time_period):
     keys = ["powerRotor","thrust","times"]
     for key in keys:
         if key not in data.keys():
@@ -52,6 +52,19 @@ def plot_power_and_thrust_time_series(data, start_time = None, end_time = None):
     ax1.legend(loc='upper left')
     ax2.legend(loc='upper right')
     ax1.grid(True)
+    
+    ax3 = ax1.twiny()
+    ax3.set_xlim(ax1.get_xlim())
+
+    nondimensional_times = times/rotor_time_period
+    num_periods = (end_time-start_time)/rotor_time_period
+    num_ticks =  int(num_periods*4) # Number of desired ticks
+    tick_indices = np.linspace(0, len(times) - 1, num_ticks, dtype=int)
+    ax3.set_xticks(times[tick_indices])
+    formatted_labels = [f"{x:.2f}" for x in nondimensional_times[tick_indices]]
+    ax3.set_xticklabels(formatted_labels)
+
+    ax3.set_xlabel('t/T')
     
     print("plotting power and torque time series")
     
@@ -113,9 +126,8 @@ def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
     fig.suptitle(f"Spanwise forces at t={plot_time}s")
     fig.tight_layout()
     
-def plot_power_and_thrust_convergence(data, start_time = None, end_time = None, rotor_time_period = None):
+def plot_power_and_thrust_convergence(data, start_time, end_time, rotor_time_period):
     fig, ax1 = plt.subplots()
-    
     
     power = data["powerRotor"]
     thrust = data["thrust"]
