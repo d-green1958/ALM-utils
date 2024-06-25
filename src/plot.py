@@ -120,6 +120,28 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
     thrust = data["thrust"]
     times = data["times"]
     
+    if start_time == None:
+        print(f"plotting time series from {times[0]}")
+    else:
+        inds, nearest_time = find_nearest_time(start_time, times)
+        print(f"plotting time series from {nearest_time}")
+        start_ind = inds[0]
+        times = times[start_ind::]
+        power = power[start_ind::]
+        thrust = thrust[start_ind::]
+    
+    
+    if end_time == None:
+        print(f"plotting time series until {times[-1]}")
+    else:
+        inds, nearest_time = find_nearest_time(end_time, times)
+        print(f"plotting time series until {nearest_time}")
+        end_ind = inds[0]
+        times = times[::end_ind]
+        power = power[::end_ind]
+        thrust = thrust[::end_ind]
+     
+    
     power_final = power[-1]
     thrust_final = thrust[-1]
     
@@ -132,6 +154,7 @@ def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
     plt.title("Power/Thrust Convergence")
     plt.ylabel("$\Delta q / q")
     plt.xlabel("time s")
+    plt.legend()
     plt.grid(True)
 
     
