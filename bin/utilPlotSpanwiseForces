@@ -170,6 +170,7 @@ def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
             axs[plot_counter].grid(True)
             axs[plot_counter].set_ylabel("Force [N]")
             axs[plot_counter].set_xlabel("r/R")
+            axs[plot_counter].legend()
             
         plot_counter += 1
     
