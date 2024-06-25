@@ -112,5 +112,26 @@ def plot_instantaneous_spanwise_forces(radial_pos, times, forces, plot_time):
     
     fig.suptitle(f"Spanwise forces at t={plot_time}s")
     fig.tight_layout()
+    
+def plot_power_and_thrust_convergence(data, start_time = None, end_time = None):
+    fig = plt.figure()
+    
+    power = data["powerRotor"]
+    thrust = data["thrust"]
+    times = data["times"]
+    
+    power_final = power[-1]
+    thrust_final = thrust[-1]
+    
+    power_residual = abs((power - power_final)/power_final)
+    thrust_residual = abs((thrust - thrust_final)/thrust_final)
+    
+    plt.plot(times, power_residual, label = "power")
+    plt.plot(times, thrust_residual, label = "thrust")
+    plt.yscale("log")
+    plt.title("Power/Thrust Convergence")
+    plt.ylabel("$\Delta q / q")
+    plt.xlabel("time s")
+    plt.grid(True)
 
     

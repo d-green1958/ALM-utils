@@ -22,8 +22,6 @@ def main():
                         help='Optional directory path to plot residuals for (default: current directory)')
     parser.add_argument('-timeSeries', action='store_true', default=False,
                     help='Flag to indicate if time series should be plotted (default: False)')
-    parser.add_argument('-SPD', action='store_true', default=False,
-                        help='Flag to indicate if SPD should be considered (default: False)')
     parser.add_argument('-convergence', action='store_true', default=False,
                         help='Flag to indicate if convergence should be checked (default: False)')
     parser.add_argument('-startTime', type=float, default=None,
@@ -44,22 +42,22 @@ def main():
         sys.exit(1)
         
     plot_something = False
-    if args.timeSeries or args.SPD or args.convergence:
+    if args.timeSeries or args.convergence:
         plot_something = True
     else:
-        print("no flags provided")
+        print("no method flags (-timeSeries, -PSD, -convergence) provided")
         sys.exit(1)
     
     data = turbineOutput.read_file(dir_path, ['powerRotor','thrust', "turbineArrayProperties"])
     times, power_and_torque_data = turbineOutput.process_power_and_thrust(data)
     
+    
+    # adjust the start and end times accordingly
     time_limit_set = False
     if args.startTime != None:
-        start_time = args.startTime
         time_limit_set = True
     
     if args.endTime != None:
-        end_time = args.endTime
         time_limit_set = True
         
     if args.lastPeriod:
@@ -90,16 +88,12 @@ def main():
         args.startTime = nearest_time
         args.endTime = final_time
     
+    
+    ## now plot for the different methods
     if args.timeSeries:
         plot.plot_power_and_thrust_time_series(power_and_torque_data, args.startTime, args.endTime)
-    if args.SPD:
-        ## plot the SPD
-        print("implement this")
     if args.convergence:
-        ## plot the convergennce#
-        print("implement this")
-
-    
+        plot.plot_power_and_thrust_convergence(power_and_torque_data, args.startTime, args.endTime)
     plt.show()
     
     
