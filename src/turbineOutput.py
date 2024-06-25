@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import sys
-
+import re
 
 def read_file(case_path, file_names):
     print(f"reading from {case_path}")
@@ -41,12 +41,15 @@ def read_file(case_path, file_names):
             print(f"no file: {file_path}")
         
         print(f"-- reading {file_name} --", end=' ')
-        
         # read in data from file
-        data[file_name] = np.genfromtxt(file_path, delimiter=' ')
+        if file_name == "turbineArrayProperties":
+            data[file_name] = read_turbine_array_properties(file_path)
+        else:
+            data[file_name] = np.genfromtxt(file_path, delimiter=' ')
         print(" |done|")
         
     # return the dict
+    print("reading done \n \n")
     return data
 
 
@@ -141,16 +144,51 @@ def process_power_and_thrust(data):
     output["times"] = times
     
     return times, output
+
+
+def read_turbine_array_properties(file_path):
+    with open(file_path, 'r') as file:
+        lines = file.readlines()
+    
+    level = 0
+    last_line = ""
+    dic = {}
+    current_dic = {}
+    first_object = True
+    for line in lines:
+        if line == "":
+            continue
+        
+        if "{" in line:
+            level += 1 
             
+            # start a new dictionary
+            if level == 1:
+                current_obj = last_line.strip()          
         
+        elif "}" in line:
+            level -= 1
+            
+            # save the current dictionary
+            if level == 0:
+                dic[current_obj] = current_dic
+                
+        else:
+            if level == 1:
+                split_line = line.strip(' ').split()
+                try:
+                    current_dic[split_line[0]] = float(split_line[1])
+                except:
+                    current_dic[split_line[0]] = split_line[1] 
         
+        last_line = line        
         
+    if len(dic.keys()) >= 3:
+        print("multiple turbine plotting not implemented")
+        sys.exit(1)
         
-        
-         
-                      
+    return dic
     
+
+
     
-    
-    
-    return None, None, None

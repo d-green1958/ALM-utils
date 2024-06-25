@@ -4,11 +4,13 @@ import os
 import sys
 import argparse
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src import turbineOutput
 from src import plot
+from src import analysis
 
 
 
@@ -29,7 +31,7 @@ def main():
     parser.add_argument('-endTime', type=float, default=None,
                         help='End time for plotting (default: None)')
     parser.add_argument('-lastPeriod', action='store_true', default=False,
-                        help='Flag to indicate if the last period should be considered (default: False)')
+                        help='Flag to indicate to plot the last rotation period (default: False)')
 
     args = parser.parse_args()
     
@@ -46,14 +48,36 @@ def main():
         print("no flags provided")
         sys.exit(1)
     
-    data = turbineOutput.read_file(dir_path, ['powerRotor','thrust'])
+    data = turbineOutput.read_file(dir_path, ['powerRotor','thrust', "turbineArrayProperties"])
     times, power_and_torque_data = turbineOutput.process_power_and_thrust(data)
     
-       
+    time_limit_set = False
+    if args.startTime != None:
+        start_time = args.startTime
+        time_limit_set = True
     
+    if args.endTime != None:
+        end_time = args.endTime
+        time_limit_set = True
+        
+    if args.lastPeriod:
+        if time_limit_set:
+            print("cannot set a time limit (start/end) and use lastPeriod")
+            sys.exit(1)
+        
+        rotor_rpm = data["turbineArrayProperties"]["turbine0"]["RotSpeed"]
+        rotor_time_period = 2*np.pi/rotor_rpm
+        
+        print(f"rotor time period is {rotor_time_period}")
+        final_time = times[-1]
+        inds, nearest_time = analysis.find_nearest_time(final_time - rotor_time_period, times)
+        args.startTime = nearest_time
+        args.endTime = final_time
+        
+
     
     if args.timeSeries:
-        plot.plot_power_and_thrust_time_series(power_and_torque_data)
+        plot.plot_power_and_thrust_time_series(power_and_torque_data, args.startTime, args.endTime)
     if args.SPD:
         ## plot the SPD
         print("implement this")
