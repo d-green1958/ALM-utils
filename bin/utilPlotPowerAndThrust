@@ -32,6 +32,8 @@ def main():
                         help='End time for plotting (default: None)')
     parser.add_argument('-lastPeriod', action='store_true', default=False,
                         help='Flag to indicate to plot the last rotation period (default: False)')
+    parser.add_argument('-lastNPeriods', type=float, default=None,
+                        help='Flag to plot the last N periods (default: None)')
 
     args = parser.parse_args()
     
@@ -74,7 +76,19 @@ def main():
         args.startTime = nearest_time
         args.endTime = final_time
         
-
+    if args.lastNPeriods != None:
+        if time_limit_set:
+            print("cannot set a time limit (start/end) and use lastPeriod")
+            sys.exit(1)
+        
+        rotor_rpm = data["turbineArrayProperties"]["turbine0"]["RotSpeed"]
+        rotor_time_period = 2*np.pi/rotor_rpm
+        
+        print(f"rotor time period is {rotor_time_period}")
+        final_time = times[-1]
+        inds, nearest_time = analysis.find_nearest_time(final_time - args.lastNPeriods * rotor_time_period, times)
+        args.startTime = nearest_time
+        args.endTime = final_time
     
     if args.timeSeries:
         plot.plot_power_and_thrust_time_series(power_and_torque_data, args.startTime, args.endTime)
