@@ -191,4 +191,18 @@ def read_turbine_array_properties(file_path):
     
 
 
+def process_rotational_angle(data):
+    keys = data.keys()
+    if "rotationAngle" not in keys:
+        print("ERR: -- rotationAngle not found in data -- ")
+        sys.exit(1)
     
+    theta_data = data["rotationAngle"]
+    
+    times = None
+    rot_position = None
+    
+    print("implement this!!")
+    sys.exit(2)
+    
+    return times, rot_position
