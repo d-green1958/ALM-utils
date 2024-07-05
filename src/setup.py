@@ -6,11 +6,13 @@ def get_version():
     return version
 
 setup(
-    name='ALM-utils',
+    name='ALMutils',
     version=get_version(),
     packages=find_packages(),
     install_requires=[
-        # Add any dependencies your package needs here
+    	'vtk',
+    	'numpy',
+    	'pandas'
     ],
     # Metadata
     author='Dylan Green',
