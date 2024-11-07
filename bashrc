@@ -1,9 +1,6 @@
 #!/bin/bash
 
 repo_dir=$(dirname "${BASH_SOURCE[0]}")
-directory_relative="bin"
-
-directory="$repo_dir/$directory_relative"
-
+directory="$repo_dir/bin"
 export PATH="$directory:$PATH"
 
