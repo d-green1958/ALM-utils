@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+import ALM_utils
+import os
+
+def process_samples(postProcessing_path, sample_dirs):
+    import ALM_utils
+    print("--samples")
+    import numpy as np
+    sample_dirs_stripped = np.unique([dir.replace("Inst","").replace("Stat","") for dir in sample_dirs])
+    
+    for sample in sample_dirs_stripped:
+        if (f"{sample}Inst" in sample_dirs) & (f"{sample}Stat" in sample_dirs):
+            print(f"  --{sample}")  
+            inst_path = os.path.join(postProcessing_path, f"{sample}Inst")
+            stat_path = os.path.join(postProcessing_path, f"{sample}Stat")
+            
+            times_str = os.listdir(inst_path)
+            times_float = [float(_) for _ in times_str]
+            max_time_ind = np.argmax(times_float)
+            max_time_str = times_str[max_time_ind]
+            
+            inst_path = os.path.join(inst_path, max_time_str)
+            stat_path = os.path.join(stat_path, max_time_str)
+            
+            
+
+    
+
+
+def process_probes(postProcessing_path, probe_dirs):
+    return
+
+
+
+if __name__ == "__main__":
+    cwd = os.getcwd()
+    postProcessing_path = os.path.join(cwd, "postProcessing")
+    turbineOutput_path = os.path.join(cwd, "turbineOutput")
+    
+    turbineOutput_exists = os.path.exists(turbineOutput_path)
+    postProcessing_exists = os.path.exists(postProcessing_path)
+    
+    print(f"case name: {cwd}")
+    if postProcessing_exists:
+        print("\nfound postProcessing dir")
+        
+        sample_dirs = []
+        probe_dirs = []
+        
+        
+        list_of_postProcessing_dirs = os.listdir(postProcessing_path)
+        for dir in list_of_postProcessing_dirs:
+            if "sample" in dir.lower():
+                sample_dirs.append(dir)
+            elif "probe" in dir.lower():
+                probe_dirs.append(dir)
+            
+        if len(sample_dirs) != 0:
+            process_samples(postProcessing_path, sample_dirs)
+        if len(probe_dirs) != 0:
+            process_probes(postProcessing_path, probe_dirs)
+
+    else:
+        print("ERR: could not find postProcessing dir")
+        
+    if turbineOutput_exists:
+        print("\nfound turbineOutput dir")
+    else:
+        print("ERR: could not find turbineOutput dir")
+    
+    
