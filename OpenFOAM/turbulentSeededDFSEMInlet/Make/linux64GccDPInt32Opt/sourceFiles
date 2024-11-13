@@ -1,0 +1,6 @@
+SOURCE = \
+turbulentSeededDFSEMInlet/turbulentSeededDFSEMInletFvPatchVectorField.C \
+turbulentSeededDFSEMInlet/eddy/eddy.C \
+turbulentSeededDFSEMInlet/eddy/eddyIO.C \
+
+# sources

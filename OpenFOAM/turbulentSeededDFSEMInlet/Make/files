@@ -1,0 +1,6 @@
+turbulentSeededDFSEMInlet/turbulentSeededDFSEMInletFvPatchVectorField.C
+turbulentSeededDFSEMInlet/eddy/eddy.C
+turbulentSeededDFSEMInlet/eddy/eddyIO.C
+
+
+LIB = $(FOAM_USER_LIBBIN)/libturbulentSeededDFSEM
