@@ -1,0 +1,3 @@
+phaseAverage.C
+
+LIB = $(FOAM_USER_LIBBIN)/libphaseAverageFunctionObject
