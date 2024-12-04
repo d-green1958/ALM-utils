@@ -1,10 +1,21 @@
 def turbineOutput(
     case_path: str,
     bin_size: float,
+    time_start: float = 0,
     turbineOutput_subdir: str = None,
     organise_rotor_performance: bool = True,
     organise_blade_loads: bool = True,
 ):
+    """_summary_
+
+    Args:
+        case_path (str): path to case
+        bin_size (float): size of bins in degrees
+        time_start (float): time to start organising after. Defaults to 0.
+        turbineOutput_subdir (str, optional): turbineOutput subdirectory to read from. Defaults to None in which if only one directory exists this will be used..
+        organise_rotor_performance (bool, optional): organise the rotor performances. Defaults to True.
+        organise_blade_loads (bool, optional): organise the blade loads. Defaults to True.
+    """
     import os
     import pandas as pd
     import numpy as np
@@ -59,12 +70,14 @@ def turbineOutput(
 
         if organise_rotor_performance:
             if file in ["thrust", "powerRotor", "torqueRotor"]:
+                print(f"  --organising {file}")
                 _prep_file(
                     phaseAveraged_postProcessing_path,
                     file_path,
                     bins,
                     bin_inds,
                     times_float,
+                    time_start,
                 )
                 None
 
@@ -87,6 +100,7 @@ def _prep_file(
     bins,
     bin_inds,
     times_float,
+    time_start,
     multiple_blades=False,
 ):
     import pandas as pd, os, numpy as np
@@ -98,17 +112,24 @@ def _prep_file(
 
     bin_names = np.array("outside")
     for i in range(1, len(bins)):
-        bin_names = np.append(bin_names, f"{bins[i-1]}-{bins[i]}")
+        bin_names = np.append(bin_names, f"{bins[i-1]}_{bins[i]}")
 
     if not multiple_blades:
         df["bin"] = bin_names[bin_inds]
+        destination = os.path.join(
+            phaseAveraged_turbineOutput_path, os.path.basename(file_path)
+        )
+        
+        df = df[df["Time(s)"] > time_start]
+        
+        df.to_csv(destination)
     else:
         # phases = np.array([])
         # for time in df["Time(s)"]:
         #     # print(time)
         #     ind = np.argmin(np.abs(float(time) == times_float))
         #     # print(ind)
-        
+
         # difficult to read in file due to terrible naming system!!!
-        
+
         raise NotImplementedError("Not implemented")

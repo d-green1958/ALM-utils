@@ -1,6 +1,7 @@
 def postProcessing(
     case_path: str,
     bin_size: float,
+    time_start: float = 0,
     turbineOutput_subdir: str = None,
     organise_samples: bool = True,
     organise_surfaces: bool = True,
@@ -10,6 +11,7 @@ def postProcessing(
     Args:
         case_path (str): path to case
         bin_size (float): bin size in degrees
+        time_start (float, optional): time to start processsing after. Defaults to 0
         turbineOutput_subdir (str, optional): Name of turbineOutput subdir. Defaults to None in which case if only one subdir exists it will assume that.
         organise_samples (bool, optional): Organise the sample files. Defaults to True.
         organise_surfaces (bool, optional): Organise the surface files. Defaults to True.
@@ -71,27 +73,36 @@ def postProcessing(
         if organise_surfaces:
             if "surface" in dir:
                 surface_dir_path = os.path.join(postProcess_path, dir)
+                print(f"  --organising {dir}")
                 _organise_surfaces(
                     phaseAveraged_postProcessing_path,
                     surface_dir_path,
                     bins,
                     bin_inds,
                     times_float,
+                    time_start
                 )
         if organise_samples:
             if "sample" in dir:
                 sample_dir_path = os.path.join(postProcess_path, dir)
+                print(f"  --organising {dir}")
                 _organise_samples(
                     phaseAveraged_postProcessing_path,
                     sample_dir_path,
                     bins,
                     bin_inds,
                     times_float,
+                    time_start,
                 )
 
 
 def _organise_samples(
-    phaseAveraged_postProcessing_path, sample_dir_path, bins, bin_inds, times_float
+    phaseAveraged_postProcessing_path,
+    sample_dir_path,
+    bins,
+    bin_inds,
+    times_float,
+    time_start,
 ):
     import os
     import numpy as np
@@ -104,7 +115,7 @@ def _organise_samples(
 
     bin_names = np.array("outside")
     for i in range(1, len(bins)):
-        bin_names = np.append(bin_names, f"{bins[i-1]}-{bins[i]}")
+        bin_names = np.append(bin_names, f"{bins[i-1]}_{bins[i]}")
 
     for name in bin_names:
         os.makedirs(os.path.join(phaseAveraged_sample_path, name), exist_ok=True)
@@ -113,6 +124,10 @@ def _organise_samples(
         time_dir_path = os.path.join(sample_dir_path, time_dir)
         time_dir_str = time_dir
         time_dir_float = float(time_dir)
+        
+        if time_dir_float < time_start:
+            continue
+        
         if time_dir_float in times_float:
             ind = np.where(time_dir_float == times_float)[0][0]
             bin_ind = bin_inds[ind]
@@ -139,7 +154,12 @@ def _organise_samples(
 
 
 def _organise_surfaces(
-    phaseAveraged_postProcessing_path, surface_dir_path, bins, bin_inds, times_float
+    phaseAveraged_postProcessing_path,
+    surface_dir_path,
+    bins,
+    bin_inds,
+    times_float,
+    time_start,
 ):
     import os
     import numpy as np
@@ -152,7 +172,7 @@ def _organise_surfaces(
 
     bin_names = np.array("outside")
     for i in range(1, len(bins)):
-        bin_names = np.append(bin_names, f"{bins[i-1]}-{bins[i]}")
+        bin_names = np.append(bin_names, f"{bins[i-1]}_{bins[i]}")
 
     for name in bin_names:
         os.makedirs(os.path.join(phaseAveraged_surface_path, name), exist_ok=True)
@@ -161,6 +181,10 @@ def _organise_surfaces(
         time_dir_path = os.path.join(surface_dir_path, time_dir)
         time_dir_str = time_dir
         time_dir_float = float(time_dir)
+        
+        if time_dir_float < time_start:
+            continue
+        
         if time_dir_float in times_float:
             ind = np.where(time_dir_float == times_float)[0][0]
             bin_ind = bin_inds[ind]
