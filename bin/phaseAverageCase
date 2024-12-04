@@ -1,0 +1,61 @@
+#!/usr/bin/env python3
+import argparse
+import os
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Script to demonstrate --bin-width argument."
+    )
+    parser.add_argument(
+        "--bin-width",
+        "-b",
+        type=float,
+        required=True,  # Makes this argument mandatory
+        help="The bin width as a float value.",
+    )
+    parser.add_argument(
+        "--start-time",
+        "-t",
+        type=float,
+        required=True,  # Makes this argument mandatory
+        help="The bin width as a float value.",
+    )
+    parser.add_argument(
+        "--case-path",
+        "-c",
+        type=str,
+        default=os.getcwd(),  # Defaults to the current working directory
+        help="The folder to use. Defaults to the current working directory.",
+    )
+    args = parser.parse_args()
+    bin_width = args.bin_width
+    case_path = args.case_path
+    time_start = args.start_time
+
+    import pyALMTree
+
+    # organise the case
+    print(f"Organising for phase averaging: {case_path}")
+    pyALMTree.phase_average.organise_case.postProcessing(
+        case_path, bin_width, organise_surfaces=False, time_start=time_start
+    )
+    pyALMTree.phase_average.organise_case.turbineOutput(
+        case_path, bin_width, organise_blade_loads=False, time_start=time_start
+    )
+
+    # now phase average
+    print(f"Phase Averaging: {case_path}")
+    pyALMTree.phase_average.calculate.postProcessing(
+        case_path, calculate_surfaces=False
+    )
+    pyALMTree.phase_average.calculate.turbineOutput(
+        case_path, calculate_blade_loads=False
+    )
+
+    print(f"Cleaning up: {case_path}")
+    pyALMTree.phase_average.organise_case.clean_up(case_path)
+
+
+if __name__ == "__main__":
+    main()
