@@ -1,0 +1,27 @@
+#!/usr/bin/env python3
+
+
+import pyALMTree.plot
+
+
+def main(dir = None, verbose = True, show = True, save_path = None):
+    import os
+    import numpy as np
+    import matplotlib.pyplot as plt
+    import pyALMTree.plot
+    
+    if dir == None:
+        dir = os.getcwd()
+        
+    if verbose:
+        print(f"Working in {dir}")
+    
+    pyALMTree.plot.turbineOutput.thrust(dir)
+    pyALMTree.plot.turbineOutput.thrust_FFT(dir)
+    pyALMTree.plot.turbineOutput.thrust_FFT_log_log(dir)
+    
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

@@ -1,5 +1,5 @@
 import pandas as pd
-def read(file_path):
+def turbineOutput_file(file_path):
     with open(file_path, 'r') as f:
         header_line = f.readline().strip()
         # Split the header by four spaces
