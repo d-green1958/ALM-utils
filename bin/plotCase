@@ -1,27 +1,98 @@
 #!/usr/bin/env python3
+import argparse
+import os
 
 
-import pyALMTree.plot
-
-
-def main(dir = None, verbose = True, show = True, save_path = None):
-    import os
+def main(dir=None, cut_time=4, verbose=True, show=True, save_path=None):
     import numpy as np
     import matplotlib.pyplot as plt
     import pyALMTree.plot
-    
+
     if dir == None:
         dir = os.getcwd()
-        
+
+    if save_path == None:
+        save_path = os.path.join(os.getcwd(), "caseFigures")
+        if not os.path.exists(save_path):
+            if verbose:
+                print(f"making figure path")
+            os.mkdir(save_path)
+
     if verbose:
         print(f"Working in {dir}")
-    
-    pyALMTree.plot.turbineOutput.thrust(dir)
-    pyALMTree.plot.turbineOutput.thrust_FFT(dir)
-    pyALMTree.plot.turbineOutput.thrust_FFT_log_log(dir)
-    
-    plt.show()
+        print(f"saving to {save_path}")
+
+    pyALMTree.plot.turbineOutput.thrust(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.thrust_FFT(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.thrust_details(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.thrust_FFT_log_log(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.torque(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.torque_FFT(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.torque_details(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+    pyALMTree.plot.turbineOutput.torque_FFT_log_log(
+        dir, save_path=save_path, cut_time=cut_time, verbose=verbose
+    )
+
+    if show:
+        plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(
+        description="Process command-line arguments for a script."
+    )
+
+    parser.add_argument(
+        "-s", "--show", action="store_true", help="Show the plots (default: False)"
+    )
+    parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Run the script in quiet mode (default: False)",
+    )
+    parser.add_argument(
+        "-t",
+        "--cutTime",
+        type=float,
+        default=0.0,
+        help="Set the convergence time (default: 0)",
+    )
+    parser.add_argument(
+        "-d",
+        "--dir",
+        type=str,
+        default=None,
+        help="Set the working directory (default: current working directory)",
+    )
+    parser.add_argument(
+        "-o",
+        "--outPath",
+        type=str,
+        default=None,
+        help="Set the output directory (default: caseFigures in the current working directory)",
+    )
+
+    args = parser.parse_args()
+
+    main(
+        show=args.show,
+        cut_time=args.cutTime,
+        verbose=not args.quiet,
+        save_path=args.outPath,
+        dir=args.dir,
+    )
