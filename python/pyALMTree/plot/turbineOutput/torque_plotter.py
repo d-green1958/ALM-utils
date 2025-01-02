@@ -5,7 +5,7 @@ from pyALMTree.read.turbineOutput import turbineOutput_file as read_file
 import PyhD
 
 
-def torque(case_path, cut_time=0, verbose=True, save_path=None):
+def torque(case_path, time_series_limits=[0,1000], verbose=True, save_path=None):
     PyhD.matplotlib.style.apply_style()
     turbineOutput_path = os.path.join(case_path, "turbineOutput")
     turbineOutput_path = os.path.join(
@@ -20,7 +20,8 @@ def torque(case_path, cut_time=0, verbose=True, save_path=None):
         print(f"plotting torque")
 
     df = read_file(torque_path)
-    df = df[df["Time(s)"] >= cut_time]
+    df = df[df["Time(s)"] >= time_series_limits[0]]
+    df = df[df["Time(s)"] <= time_series_limits[1]]
     
     figure, axs = PyhD.matplotlib.plot_helpers.landscape_fig(
         fig_name="torque",
@@ -42,7 +43,7 @@ def torque(case_path, cut_time=0, verbose=True, save_path=None):
     return figure, axs
 
 
-def torque_FFT(case_path, cut_time=0, verbose=True, save_path=None):
+def torque_FFT(case_path, time_series_limits=[0,1000], verbose=True, save_path=None):
     PyhD.matplotlib.style.apply_style()
     turbineOutput_path = os.path.join(case_path, "turbineOutput")
     turbineOutput_path = os.path.join(
@@ -57,7 +58,8 @@ def torque_FFT(case_path, cut_time=0, verbose=True, save_path=None):
         print(f"plotting torque FFT")
 
     df = read_file(torque_path)
-    df = df[df["Time(s)"] >= cut_time]
+    df = df[df["Time(s)"] >= time_series_limits[0]]
+    df = df[df["Time(s)"] <= time_series_limits[1]]
 
     timeseries = np.array(df["rotor torque (N-m)"])
     timevalues = np.array(df["Time(s)"])
@@ -93,7 +95,7 @@ def torque_FFT(case_path, cut_time=0, verbose=True, save_path=None):
 
     return figure, axs
 
-def torque_details(case_path, cut_time=0, verbose=True, save_path=None):
+def torque_details(case_path, time_series_limits=[0,1000], verbose=True, save_path=None):
     PyhD.matplotlib.style.apply_style()
     turbineOutput_path = os.path.join(case_path, "turbineOutput")
     turbineOutput_path = os.path.join(
@@ -108,7 +110,8 @@ def torque_details(case_path, cut_time=0, verbose=True, save_path=None):
         print(f"plotting torque details")
 
     df = read_file(torque_path)
-    df = df[df["Time(s)"] >= cut_time]
+    df = df[df["Time(s)"] >= time_series_limits[0]]
+    df = df[df["Time(s)"] <= time_series_limits[1]]
 
     timeseries = np.array(df["rotor torque (N-m)"])
     timevalues = np.array(df["Time(s)"])
@@ -153,7 +156,7 @@ def torque_details(case_path, cut_time=0, verbose=True, save_path=None):
     return figure, axs
 
 
-def torque_FFT_log_log(case_path, cut_time=0, verbose=True, save_path=None):
+def torque_FFT_log_log(case_path, time_series_limits=[0,1000], verbose=True, save_path=None):
     PyhD.matplotlib.style.apply_style()
     turbineOutput_path = os.path.join(case_path, "turbineOutput")
     turbineOutput_path = os.path.join(
@@ -168,7 +171,8 @@ def torque_FFT_log_log(case_path, cut_time=0, verbose=True, save_path=None):
         print(f"plotting torque FFT log-log")
 
     df = read_file(torque_path)
-    df = df[df["Time(s)"] >= cut_time]
+    df = df[df["Time(s)"] >= time_series_limits[0]]
+    df = df[df["Time(s)"] <= time_series_limits[1]]
 
     timeseries = np.array(df["rotor torque (N-m)"])
     timevalues = np.array(df["Time(s)"])
