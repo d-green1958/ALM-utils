@@ -46,6 +46,7 @@ def VmagC(case_path, plot_time_targets=[], verbose=True, save_path=None):
         x_label="Radius [m]",
         y_label=r"V [ms$^{-1}$]",
         title="Vmag",
+        markerstyle_arrs = np.full(len(radius_arr), ".")
     )
     
 

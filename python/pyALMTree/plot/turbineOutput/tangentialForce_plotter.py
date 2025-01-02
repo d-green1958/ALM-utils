@@ -45,7 +45,8 @@ def tangentialForce(case_path, plot_time_targets=[], verbose=True, save_path=Non
         legend_title="Time [s]",
         x_label="Radius [m]",
         y_label=r"Axial Force [N]",
-        title="Axial Force",
+        title="Tangential Force",
+        markerstyle_arrs = np.full(len(radius_arr), ".")
     )
     
     if not save_path == None:

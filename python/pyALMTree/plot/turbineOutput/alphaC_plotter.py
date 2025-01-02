@@ -46,6 +46,7 @@ def alphaC(case_path, plot_time_targets=[], verbose=True, save_path=None):
         x_label="Radius [m]",
         y_label=r"Angle of Attack [$^\circ$]",
         title="Angle of Attack",
+        markerstyle_arrs = np.full(len(radius_arr), ".")
     )
     
 
