@@ -6,5 +6,5 @@ setup(
     version="1.0",
     description="utilities for the ALM workflow",
     packages=find_packages(),
-    install_requires=[],  
+    install_requires=["PyhD"],  
 )
