@@ -23,9 +23,15 @@ and to install the pyALMTree
 ```
 cd python
 pip install .
+cd ..
 ```
 or alternativly with the editable flag
 ```
 cd python
 pip install -e .
+cd ..
+```
+Now that the python package has been installed, source the bashrc file in your bashrc
+```
+echo "source $(pwd)/bashrc" >> ~/.bashrc 
 ```
