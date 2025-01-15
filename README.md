@@ -12,6 +12,13 @@ Enter the following into your terminal:
 ```
 git clone https://github.com/d-green1958/ALM-utils.git
 ```
+Now install PyhD (a submodule)
+```
+cd PhD-Formatting
+cd PyhD
+pip install .
+cd ../..
+```
 and to install the pyALMTree
 ```
 cd python
