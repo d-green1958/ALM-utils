@@ -12,7 +12,14 @@ Enter the following into your terminal:
 ```
 git clone https://github.com/d-green1958/ALM-utils.git
 ```
-Now install PyhD (a submodule)
+Now run the install script
+```
+./install.sh
+```
+That's it!
+
+## Manual Installation
+Install PyhD (a submodule)
 ```
 cd PhD-Formatting
 cd PyhD
