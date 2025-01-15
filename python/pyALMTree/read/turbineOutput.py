@@ -10,10 +10,11 @@ def turbineOutput_file(file_path, blade_data_file=False):
     # Read the rest of the file as a DataFrame
     data = pd.read_csv(file_path, delimiter=r'\s+', skiprows=1, header=None)
     
+    number_of_headers = len(headers)
+    number_of_columns = len(data.iloc[0,:])
+    
     # if the final column contains blade data then combine it into an array
     if blade_data_file:
-        number_of_headers = len(headers)
-        number_of_columns = len(data.iloc[0,:])
         blade_data_key = headers[-1]
         
         blade_data_columns = data.iloc[:, number_of_headers-1:]
@@ -25,6 +26,8 @@ def turbineOutput_file(file_path, blade_data_file=False):
         
         data[blade_data_key] = [row for row in blade_data_arr]
     else:
+        if number_of_headers != number_of_columns:
+            raise AttributeError("I think you forgot to use blade_data_file=True")
         data.columns = headers
-        
+    
     return data
