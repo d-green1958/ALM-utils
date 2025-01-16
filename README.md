@@ -26,7 +26,10 @@ cd PyhD
 pip install .
 cd ../..
 ```
-and to install the pyALMTree
+>[!NOTE]
+>You may want to fork your own PyhD package for customisation
+
+To install the pyALMTree
 ```
 cd python
 pip install .
