@@ -79,7 +79,7 @@ class CaseReader:
         Returns:
             bool: bool representing if turbineOutput exists 
         """
-        return os.exists(self.turbineOutput_path)
+        return os.path.exists(self.turbineOutput_path)
     
     def postProcessing_exists(self):
         """
@@ -90,7 +90,7 @@ class CaseReader:
         Returns:
             bool: bool representing if turbineOutput exists 
         """
-        return os.exists(self.postProcessing_path)
+        return os.path.exists(self.postProcessing_path)
 
     def __str__(self):
         """
