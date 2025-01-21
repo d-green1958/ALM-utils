@@ -1,7 +1,22 @@
 import pandas as pd
 import numpy as np
 
-def turbineOutput_file(file_path, blade_data_file=False):
+def turbineOutput_file(file_path: str, blade_data_file: bool = False) -> pd.DataFrame:
+    """
+    Reads a turbine output file and processes its data into a pandas DataFrame.
+
+    Args:
+        file_path (str): Path to the file to be processed.
+        blade_data_file (bool, optional): If True, indicates the file contains blade-specific 
+                                          data with blade distribution in the final column. 
+                                          Defaults to False.
+
+    Raises:
+        AttributeError: Raised if the number of header rows does not match the number of columns.
+
+    Returns:
+        pd.DataFrame: A DataFrame containing the processed turbine data.
+    """
     with open(file_path, 'r') as f:
         header_line = f.readline().strip()
         # Split the header by four spaces

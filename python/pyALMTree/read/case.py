@@ -1,6 +1,8 @@
 from . import turbineOutput
 import os
 import warnings
+import pandas as pd
+import numpy as np
 
 
 class CaseReader:
@@ -34,10 +36,16 @@ class CaseReader:
         self.turbineOutput_path = os.path.join(path_, "turbineOutput", "0")
         if not os.path.exists(self.turbineOutput_path):
             warnings.warn(f"The file turbineOutput does not exist!", UserWarning)
+            self.turbineOutput_files = None
+        else:
+            self.turbineOutput_files = os.listdir(self.turbineOutput_path)
 
         self.postProcessing_path = os.path.join(path_, "postProcessing")
         if not os.path.exists(self.postProcessing_path):
             warnings.warn(f"The file postProcessing does not exist!", UserWarning)
+            self.postProcessing_files = None
+        else:
+            self.postProcessing_files = os.listdir(self.postProcessing_path)
 
     def set_path(self, path_):
         """
@@ -91,6 +99,34 @@ class CaseReader:
             bool: bool representing if turbineOutput exists 
         """
         return os.path.exists(self.postProcessing_path)
+    
+    def postProcessing_sample(self, sample_subdir_name: str, variable_name: str, target_time: float, avoid_variables: list[str] = None) ->pd.DataFrame:
+        sample_subdir_path = os.path.join(self.postProcessing_path, sample_subdir_name)
+        if not os.path.exists(sample_subdir_path):
+            raise FileExistsError(f"Cannot find dir: {sample_subdir_path}")
+            
+        times_str = os.listdir(sample_subdir_path)
+        times_float = np.array(times_str, dtype=float)
+        time_ind = np.argmin(np.abs(times_float - target_time))
+        
+        time_dir_name = times_str[time_ind]
+        time_dir_path = os.path.join(sample_subdir_path, time_dir_name)
+        
+        file_names = os.lsitdir(time_dir_path)
+        data_dict = {}
+        for file_name in file_names:
+            if not variable_name in file_name:
+                continue
+            
+            if any(var in file_name for var in avoid_variables):
+                continue
+            
+            file_path = os.path.join(time_dir_path, file_name)
+            data_dict[file_name] = pd.read_csv(file_path)
+        
+        return pd.DataFrame(data_dict)
+            
+        
 
     def __str__(self):
         """
