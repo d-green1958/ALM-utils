@@ -77,7 +77,7 @@ def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
         
         if file_type == "vector/tensor":
             n = len(df[column][0])
-            arrays_by_index = [np.array(df[column].apply(lambda x: x[i])) for i in range(n)]
+            arrays_by_index = [np.array(df[column].apply(lambda x: x[i]), dtype=float) for i in range(n)]
             for i in range(n):
                 probe_dict[f"{variable_name}_{i}"] = arrays_by_index[i]
         else:
