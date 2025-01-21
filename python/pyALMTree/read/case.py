@@ -1,9 +1,11 @@
 from . import turbineOutput
+from . import postProcessing_sample
+from . import postProcessing_probe
 import os
 import warnings
 import pandas as pd
 import numpy as np
-
+from typing import Dict
 
 class CaseReader:
     """
@@ -20,7 +22,7 @@ class CaseReader:
         postProcessing_path (str): Path to the "postProcessing" directory.
     """
 
-    def __init__(self, path_):
+    def __init__(self, path_, warnings = True):
         """
         Initializes the CaseReader with the specified case directory.
 
@@ -35,14 +37,16 @@ class CaseReader:
 
         self.turbineOutput_path = os.path.join(path_, "turbineOutput", "0")
         if not os.path.exists(self.turbineOutput_path):
-            warnings.warn(f"The file turbineOutput does not exist!", UserWarning)
+            if warnings:
+                warnings.warn(f"The file turbineOutput does not exist!", UserWarning)
             self.turbineOutput_files = None
         else:
             self.turbineOutput_files = os.listdir(self.turbineOutput_path)
 
         self.postProcessing_path = os.path.join(path_, "postProcessing")
         if not os.path.exists(self.postProcessing_path):
-            warnings.warn(f"The file postProcessing does not exist!", UserWarning)
+            if warnings:
+                warnings.warn(f"The file postProcessing does not exist!", UserWarning)
             self.postProcessing_files = None
         else:
             self.postProcessing_files = os.listdir(self.postProcessing_path)
@@ -100,7 +104,7 @@ class CaseReader:
         """
         return os.path.exists(self.postProcessing_path)
     
-    def postProcessing_sample(self, sample_subdir_name: str, variable_name: str, target_time: float, avoid_variables: list[str] = None) ->pd.DataFrame:
+    def postProcessing_sample(self, sample_subdir_name: str, read_variables: list[str], target_time: float, avoid_variables: list[str] = []) ->Dict[str, pd.DataFrame]:
         sample_subdir_path = os.path.join(self.postProcessing_path, sample_subdir_name)
         if not os.path.exists(sample_subdir_path):
             raise FileExistsError(f"Cannot find dir: {sample_subdir_path}")
@@ -112,20 +116,39 @@ class CaseReader:
         time_dir_name = times_str[time_ind]
         time_dir_path = os.path.join(sample_subdir_path, time_dir_name)
         
-        file_names = os.lsitdir(time_dir_path)
+        file_names = os.listdir(time_dir_path)
         data_dict = {}
         for file_name in file_names:
-            if not variable_name in file_name:
+            if not any(var in file_name for var in read_variables):
                 continue
             
             if any(var in file_name for var in avoid_variables):
                 continue
             
             file_path = os.path.join(time_dir_path, file_name)
-            data_dict[file_name] = pd.read_csv(file_path)
+            data_dict[file_name] = postProcessing_sample.postProcessing_sample_file(file_path)
         
-        return pd.DataFrame(data_dict)
+        return data_dict
             
+    def postProcessing_probe(self, probe_subdir_name: str, probe_start_time: str, read_variables: list[str], avoid_variables: list[str] = []) -> Dict[str, Dict[str, any]]:
+        probe_subdir_path = os.path.join(self.postProcessing_path, probe_subdir_name, probe_start_time)
+        if not os.path.exists(probe_subdir_path):
+            raise FileExistsError(f"Cannot find dir: {probe_subdir_path}")
+        
+        file_names = os.listdir(probe_subdir_path)
+        data_dict = {}
+        for file_name in file_names:
+            if not any(var in file_name for var in read_variables):
+                continue
+            
+            if any(var in file_name for var in avoid_variables):
+                continue
+            
+            file_path = os.path.join(probe_subdir_path, file_name)
+            df = postProcessing_probe.postProcessing_probe_file(file_path)
+            data_dict[file_name] = df
+        
+        return data_dict
         
 
     def __str__(self):
