@@ -6,7 +6,6 @@ import re
 
 def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
     variable_name = os.path.basename(file_path)
-
     with open(file_path, "r") as file:
         lines = file.readlines()
 
@@ -26,10 +25,10 @@ def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
         for line in file:
             if not line.startswith("#"):
                 if "(" not in line:
-                    delimiter = "   "
+                    delimiter = r"\s+"
                     file_type = "scalar"
                 else:
-                    delimiter = "                "
+                    delimiter = r" {16}"
                     file_type = "vector/tensor"
                 break  # Stop processing further lines
             if "Time" in line:
