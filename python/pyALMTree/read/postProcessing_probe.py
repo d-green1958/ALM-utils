@@ -75,7 +75,7 @@ def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
             "y": y_coords[probe_ind],
             "z": z_coords[probe_ind],
         }
-        print("here", file_type)
+        
         if file_type == "vector/tensor":
             n = len(df[column][0])
             arrays_by_index = [np.array(df[column].apply(lambda x: x[i])) for i in range(n)]
