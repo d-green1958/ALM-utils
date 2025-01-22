@@ -1,6 +1,6 @@
 import numpy as np
 
-def find_peak_to_peak(y_arr, t_arr, frequency, cut_time):
+def find_peak_to_peak(t_arr, y_arr, frequency, cut_time):
 
     y_arr = np.array(y_arr)
     t_arr = np.array(t_arr)
