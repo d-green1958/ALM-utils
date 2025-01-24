@@ -3,7 +3,7 @@ cd PhD-Formatting
 cd PyhD
 pip install -e .
 cd ../..
-cd python
+cd pyALMTree
 pip install -e .
 cd ..
 echo "source $(pwd)/bashrc" >> ~/.bashrc 
