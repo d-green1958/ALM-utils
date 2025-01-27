@@ -17,8 +17,9 @@ def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
 
     # Regex to extract probe information
     probe_pattern = re.compile(
-        r"# Probe (\d+) \((-?\d+\.\d+|\d+) (-?\d+\.\d+|\d+) (-?\d+\.\d+|\d+)\)"
+    r"# Probe (\d+) \((-?\d+(\.\d+)?) (-?\d+(\.\d+)?) (-?\d+(\.\d+)?)\)"
     )
+
 
     # Parse each line
     with open(file_path, "r") as file:
