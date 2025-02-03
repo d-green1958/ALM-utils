@@ -4,8 +4,11 @@ import os
 import re
 
 
-def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
-    variable_name = os.path.basename(file_path)
+def postProcessing_probe_file(file_path: str, force_variable_name_to_be="") -> pd.DataFrame:
+    if force_variable_name_to_be != "":
+        variable_name = force_variable_name_to_be
+    else:
+        variable_name = os.path.basename(file_path)
     with open(file_path, "r") as file:
         lines = file.readlines()
 
@@ -17,7 +20,7 @@ def postProcessing_probe_file(file_path: str) -> pd.DataFrame:
 
     # Regex to extract probe information
     probe_pattern = re.compile(
-    r"# Probe (\d+) \((-?\d+(\.\d+)?) (-?\d+(\.\d+)?) (-?\d+(\.\d+)?)\)"
+    r"# Probe (\d+) \((-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?) (-?\d+(?:\.\d+)?)\)"
     )
 
 
