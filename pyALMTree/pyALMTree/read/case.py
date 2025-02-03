@@ -22,7 +22,7 @@ class CaseReader:
         postProcessing_path (str): Path to the "postProcessing" directory.
     """
 
-    def __init__(self, path_, warnings = True):
+    def __init__(self, path_, warnings_on = True):
         """
         Initializes the CaseReader with the specified case directory.
 
@@ -37,7 +37,7 @@ class CaseReader:
 
         self.turbineOutput_path = os.path.join(path_, "turbineOutput", "0")
         if not os.path.exists(self.turbineOutput_path):
-            if warnings:
+            if warnings_on:
                 warnings.warn(f"The file turbineOutput does not exist!", UserWarning)
             self.turbineOutput_files = None
         else:
@@ -45,7 +45,7 @@ class CaseReader:
 
         self.postProcessing_path = os.path.join(path_, "postProcessing")
         if not os.path.exists(self.postProcessing_path):
-            if warnings:
+            if warnings_on:
                 warnings.warn(f"The file postProcessing does not exist!", UserWarning)
             self.postProcessing_files = None
         else:
