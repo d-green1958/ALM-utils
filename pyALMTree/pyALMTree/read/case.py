@@ -150,8 +150,8 @@ class CaseReader:
     def postProcessing_probe(
         self,
         probe_subdir_name: str,
-        probe_start_time: str,
         read_variables: list[str],
+        probe_start_time: str = "0",
         avoid_variables: list[str] = [],
     ) -> Dict[str, Dict[str, any]]:
         probe_subdir_path = os.path.join(
