@@ -133,7 +133,7 @@ def torque_details(case_path, time_series_limits=[0,1000], verbose=True, save_pa
     
     column_labels = ["Parameter", "Value"]
     table_data = [
-        ["Mean Value", f"{np.mean(df["rotor torque (N-m)"]):.5g}"],
+        ["Mean Value", f"{np.mean(df['rotor torque (N-m)']):.5g}"],
         ["Non-Zero Peak Location", f"{(freqs[freqs > 0])[np.argmax(timeseries_FT[freqs > 0])]:.5g}"],
         ["Non-Zero Peak Value", f"{np.real((timeseries_FT[freqs > 0])[np.argmax(timeseries_FT[freqs > 0])]):.5g}"],
         ["Non-Zero Peak-to-Peak Value", f"{2.0*np.real((timeseries_FT[freqs > 0])[np.argmax(timeseries_FT[freqs > 0])]):.5g}"]
