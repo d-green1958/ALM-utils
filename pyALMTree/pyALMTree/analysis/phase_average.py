@@ -42,7 +42,7 @@ def phase_average_array(
 
     result = PhaseAverageResult()
 
-    phase_arr = np.degrees(2 * np.pi * frequency * t_arr + phase_offset) % 360
+    phase_arr = (np.degrees(2 * np.pi * frequency * t_arr) + phase_offset) % 360
     bins = np.linspace(0, 360, number_of_bins + 1)
     bin_midpoints = (bins[1:] + bins[0:-1]) * 0.5
 
