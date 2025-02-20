@@ -19,7 +19,8 @@ def phase_average_array(
     phase_offset: float = 0,
     number_of_bins: int = 45,
     bin_center_offset: float = None,
-    include_0_and_360: bool = False,
+    include_0_and_360: bool = True,
+    remove_phase_offset=False,
 ) -> PhaseAverageResult:
     """
     Phase averaged in input arrays stored within y_arrs using the times defined in t_arr.
@@ -42,7 +43,8 @@ def phase_average_array(
 
     result = PhaseAverageResult()
 
-    phase_arr = (np.degrees(2 * np.pi * frequency * t_arr) + phase_offset) % 360
+    phase_arr = (np.degrees(2 * np.pi * frequency * t_arr) +
+                 phase_offset) % 360
     bins = np.linspace(0, 360, number_of_bins + 1)
     bin_midpoints = (bins[1:] + bins[0:-1]) * 0.5
 
@@ -63,12 +65,29 @@ def phase_average_array(
             bins = np.insert(bins, 0, 0)
             bins[-1] = 360
 
-    bin_inds = np.digitize(phase_arr, bins)
+    if remove_phase_offset:
+        binned_y_arrs = []
 
-    # note cant be a numpy array since non uniform lengths
-    binned_y_arrs = [
-        [y_arr[bin_inds == i] for i in range(1, number_of_bins + 2)] for y_arr in y_arrs
-    ]
+        # first find phase angle
+        fs = 1.0/np.mean(np.diff(t_arr))
+        for ind, y_arr in enumerate(y_arrs):
+            frequencies = np.fft.fftfreq(len(y_arr), 1/fs)
+            fft_values = np.fft.fft(y_arr)
+            index = np.argmax(np.abs(frequencies - frequency) < 1e-3)
+            y_arr_phase = np.degrees(np.angle(fft_values[index])) + 90
+
+            bin_inds = np.digitize(np.mod(phase_arr + y_arr_phase, 360), bins)
+
+            # note cant be a numpy array since non uniform lengths
+            binned_y_arrs.append([y_arr[bin_inds == i] for i in range(1, number_of_bins + 2)])
+
+    else:
+        bin_inds = np.digitize(phase_arr, bins)
+
+        # note cant be a numpy array since non uniform lengths
+        binned_y_arrs = [
+            [y_arr[bin_inds == i] for i in range(1, number_of_bins + 2)] for y_arr in y_arrs
+        ]
 
     if bin_center_offset != 0:
         for i in range(len(y_arrs)):
@@ -96,7 +115,8 @@ def phase_average_array(
 
     sorted_bin_midpoints_inds = np.argsort(bin_midpoints)
     bin_midpoints = bin_midpoints[sorted_bin_midpoints_inds]
-    phase_averaged_y_arrs_std = phase_averaged_y_arrs_std[:, sorted_bin_midpoints_inds]
+    phase_averaged_y_arrs_std = phase_averaged_y_arrs_std[:,
+                                                          sorted_bin_midpoints_inds]
     phase_averaged_y_arrs = phase_averaged_y_arrs[:, sorted_bin_midpoints_inds]
 
     if include_0_and_360:
@@ -118,25 +138,28 @@ def phase_average_array(
     result.bin_counts = np.array(
         [[len(arr) for arr in binned_y_arr] for binned_y_arr in binned_y_arrs]
     )
-    
+
     return result
 
 
 if __name__ == "__main__":
     fs = 90*1000  # Sampling frequency in Hz
     t = np.linspace(0, 1,  fs, endpoint=False)  # 1-second time vector
-    signal = np.sin(2 * np.pi * 1 * t)  # 1 Hz sine wave
-    noise = np.random.normal(0, 0.1, size=t.shape)  # Gaussian noise with std dev 0.1
+    signal = np.sin(2 * np.pi * 1 * t + np.radians(180)) + np.sin(5 * np.pi * 1 * t + np.radians(189))   # 1 Hz sine wave
+    # Gaussian noise with std dev 0.1
+    noise = np.random.normal(0, 0.1, size=t.shape)
     noisy_signal = signal + noise
 
     import matplotlib.pyplot as plt
 
     plt.plot(noisy_signal)
+    plt.grid()
 
     results = phase_average_array(
         t,
         [noisy_signal],
         frequency=1,
+        remove_phase_offset=False
     )
     bins = results.bin_midpoints
     average = results.phase_averaged_arrs[0]
@@ -144,12 +167,7 @@ if __name__ == "__main__":
     std = results.phase_averaged_std_arrs[0]
 
     plt.figure()
-    plt.plot(bins, bin_counts, marker="o")
-
-    plt.figure()
     plt.plot(bins, average, marker="o")
     plt.fill_between(bins, average-std, average+std, color="b", alpha=0.3)
-    
-    print(results.binned_values)
-
+    plt.grid()
     plt.show()
