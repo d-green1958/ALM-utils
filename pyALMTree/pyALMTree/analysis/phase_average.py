@@ -144,7 +144,7 @@ def phase_average_array(
 
 if __name__ == "__main__":
     fs = 90*1000  # Sampling frequency in Hz
-    t = np.linspace(0, 1,  fs, endpoint=False)  # 1-second time vector
+    t = np.linspace(0, 10,  fs, endpoint=False)  # 1-second time vector
     signal = np.sin(2 * np.pi * 1 * t + np.radians(180)) + np.sin(5 * np.pi * 1 * t + np.radians(189))   # 1 Hz sine wave
     # Gaussian noise with std dev 0.1
     noise = np.random.normal(0, 0.1, size=t.shape)
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         t,
         [noisy_signal],
         frequency=1,
-        remove_phase_offset=False
+        remove_phase_offset=True
     )
     bins = results.bin_midpoints
     average = results.phase_averaged_arrs[0]
